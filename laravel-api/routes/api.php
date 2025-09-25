@@ -15,18 +15,21 @@ use App\Http\Controllers\Api\AuthController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-// Rutas para el controlador de usuarios, asignando nombres personalizados
-
-Route::prefix('usuarios')->group(function () {
-    Route::get('/listUsers', [UsuarioController::class, 'index']);
-    Route::post('/addUser', [UsuarioController::class, 'store']);
-    Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
-    Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
-    Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
-});
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::prefix('v1')->group(function () {
+   Route::post('/login', [AuthController::class, 'login']);
+});  // la ruta principal para el login no solicita el token por eso la dejamos fuera 
+ 
+Route::prefix('v1')
+   ->middleware(['auth:sanctum']) 
+   ->group(function () {
+       Route::get('/me', [AuthController::class, 'me']);
+       Route::post('/logout', [AuthController::class, 'logout']);
+       // CRUD Usuarios 
+       Route::prefix('usuarios')->group(function () {
+           Route::get('/listUsers', [UsuarioController::class, 'index']);
+           Route::post('/addUser', [UsuarioController::class, 'store']);
+           Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
+           Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
+           Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
+       });
+   });
