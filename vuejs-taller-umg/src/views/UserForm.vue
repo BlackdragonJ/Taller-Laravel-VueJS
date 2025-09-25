@@ -68,3 +68,84 @@
     </v-card>
   </v-container>
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import api from "@/services/api";
+
+const router = useRouter();
+const route = useRoute();
+const id = route.params.id as string | undefined;
+const isEdit = computed(() => !!id);
+
+const valid = ref(false);
+const saving = ref(false);
+const errorMsg = ref("");
+const okMsg = ref("");
+
+const roles = ["admin", "user"];
+
+const form = ref({
+  nombre: "",
+  email: "",
+  rol: "user",
+  password: "", // solo al crear
+});
+
+const rules = {
+  required: (v: string) => !!v || "Requerido",
+  email: (v: string) => /.+@.+\..+/.test(v) || "Email inválido",
+  min6: (v: string) =>
+    (!v && isEdit.value) || v.length >= 6 || "Mínimo 6 caracteres",
+};
+
+onMounted(async () => {
+  if (isEdit.value) {
+    try {
+      const { data } = await api.get(`/usuarios/getUser/${id}`);
+      form.value.nombre = data.nombre;
+      form.value.email = data.email;
+      form.value.rol = data.rol || "user";
+    } catch (e: any) {
+      errorMsg.value =
+        e?.response?.data?.message || "No se pudo cargar el usuario";
+    }
+  }
+});
+
+async function onSubmit() {
+  errorMsg.value = "";
+  okMsg.value = "";
+  if (!valid.value) return;
+
+  try {
+    saving.value = true;
+    if (isEdit.value) {
+      await api.put(`/usuarios/updateUser/${id}`, {
+        nombre: form.value.nombre,
+        email: form.value.email,
+        rol: form.value.rol,
+      });
+      okMsg.value = "Usuario actualizado";
+    } else {
+      await api.post("/usuarios/addUser", {
+        nombre: form.value.nombre,
+        email: form.value.email,
+        rol: form.value.rol,
+        password: form.value.password,
+      });
+      okMsg.value = "Usuario creado";
+      form.value = { nombre: "", email: "", rol: "user", password: "" };
+    }
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message || "Error al guardar";
+  } finally {
+    saving.value = false;
+  }
+}
+
+function goList() {
+  router.push("/usuarios");
+}
+</script>
