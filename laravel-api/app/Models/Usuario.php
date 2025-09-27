@@ -11,6 +11,8 @@ class Usuario extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $connection = 'tenant';
+
     protected $table = 'usuarios'; // Nombre exacto de la tabla
 
     protected $fillable = [

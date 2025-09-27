@@ -93,6 +93,18 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'tenant' => [
+            'driver' => env('DB_CONNECTION', 'pgsql'),
+            'host' => env('TENANT_DB_HOST', '127.0.0.1'),
+            'port' => env('TENANT_DB_PORT', '5432'),
+            'database' => env('TENANT_DB_DATABASE', 'forge'),
+            'username' => env('TENANT_DB_USERNAME', 'forge'),
+            'password' => env('TENANT_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'search_path' => 'public',
+        ],
+
     ],
 
     /*
